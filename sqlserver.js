@@ -28,60 +28,60 @@ app.use(express.json())
 
 //Register for new user
 app.post('/register', (req, res) => {
-    const username = req.body.username;
-    const hashedPasswrord = await bcrypt.hash(req.body.password, 10);
+    const email = req.body.email;
+    const name = req.body.username;
+    const hashedPasswrord = bcrypt.hash(req.body.password, 10);
 
     db.getConnection((err, connection) => {
         if (err) throw (err)
 
-        const dbSearch = 'SELECT * FROM users WHERE username = ?'
-        const search_query = mysql.format(dbSearch, [username])
+        const dbSearch = 'SELECT * FROM users WHERE email = ?'
+        const search_query = mysql.format(dbSearch, [email])
 
-        const dbInsert = 'INSERT INTO users (username, password) VALUES (?, ?)'
-        const insert_query = mysql.format(dbInsert, [username, hashedPasswrord])
+        const dbInsert = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)'
+        const insert_query = mysql.format(dbInsert, [name, email, hashedPasswrord])
 
-        await connection.query(search_query, (err, result) => {
+        connection.query(search_query, (err, result) => {
             if (err) throw (err)
+
             if (result.length > 0) {
-                connection.release()
-                console.log('User already exists')
-                res.send(409)
+                res.send('User already exists')
             } else {
-                await connection.query(insert_query, (err, result) => {
+                connection.query(insert_query, (err, result) => {
                     connection.release()
                     if (err) throw (err)
-                    console.log('User created')
-                    console.log(result.insertId)
-                    res.send(201)
+                    res.send('User created')
                 })
             }
         })
     })
 })
 
-//Login
+//Login for existing user
 app.post('/login', (req, res) => {
-    const username = req.body.username;
+    const email = req.body.email;
     const password = req.body.password;
 
     db.getConnection((err, connection) => {
         if (err) throw (err)
 
-        const dbSearch = 'SELECT * FROM users WHERE username = ?'
-        const search_query = mysql.format(dbSearch, [username])
+        const dbSearch = 'SELECT * FROM users WHERE email = ?'
+        const search_query = mysql.format(dbSearch, [email])
 
         connection.query(search_query, (err, result) => {
+            connection.release()
             if (err) throw (err)
+
             if (result.length > 0) {
                 bcrypt.compare(password, result[0].password, (err, response) => {
                     if (response) {
                         res.send('Logged in')
                     } else {
-                        res.send('Incorrect username or password')
+                        res.send('Wrong password')
                     }
                 })
             } else {
-                res.send('Incorrect username or password')
+                res.send('User does not exist')
             }
         })
     })
