@@ -4,15 +4,16 @@ const path = require('path')
 const {Storage} = require('@google-cloud/storage')
 const path = require('path');
 
-const keyPath = path.join('./sakeybucket.json')
+
+const keyPath = path.join('./imgUploadsakey.json')
 const sakeypath = path.resolve(keyPath)
 
 const storage = new Storage({
     keyFilename: sakeypath,
-    projectId: 'YOUR_PROJECT_ID'
+    projectId: 'trashsort-388213'
 })
 
-const bucketName = 'YOUR_BUCKET_NAME'
+const bucketName = 'trashsort-img'
 const bucket = storage.bucket(bucketName)
 
 const getPublicUrl = (filename) => {
@@ -51,4 +52,4 @@ uploadImg.upload = (req, res, next) => {
     stream.end(req.file.buffer)
 }
 
-module.exports = uploadImg
+module.exports = {uploadImg, getPublicUrl}
