@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const multer = require('multer')
+const { classifyImage } = require('./modules/VertexAI')
 
 const uploadImage = require('./helpers/helpers')
 
@@ -44,15 +45,15 @@ app.use((err, req, res, next) => {
 })
 
 //to get the image url and send to vertex ai
-app.get('/uploads', async (req, res, next) => {
+app.get('/classify', async (req, res, next) => {
     try {
-        const myFile = req.file
-        const imageUrl = await uploadImage(myFile)
+        const imageUrl = req.query.imageUrl
+        const classificationResult = await classifyImage(imageUrl)
         res
             .status(200)
             .json({
-                message: "Upload was successful",
-                data: imageUrl
+                message: "Classification was successful",
+                data: classificationResult
             })
     } catch (error) {
         next(error)
@@ -62,12 +63,12 @@ app.get('/uploads', async (req, res, next) => {
 //to get the classification result from vertex ai and send to user
 app.get('/result', async (req, res, next) => {
     try {
-        const result = req.result
+        const classificationResult = req.query.classificationResult
         res
             .status(200)
             .json({
                 message: "Classification was successful",
-                data: result
+                data: classificationResult
             })
     } catch (error) {
         next(error)
