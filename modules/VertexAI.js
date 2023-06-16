@@ -2,8 +2,8 @@ const { PredictionServiceClient } = require('@google-cloud/aiplatform').v1;
 const fs = require('fs');
 const { promisify } = require('util');
 const readFileAsync = promisify(fs.readFile);
-const { Storage } = require('@google-cloud/storage');
-const storage = new Storage();
+const gc = require('../config/')
+const bucket = gc.bucket('trashsort-img')
 
 async function classifyImage(projectId, location, modelId, imagePath) {
   // Create a client for the Vertex AI
@@ -37,7 +37,7 @@ async function classifyImage(projectId, location, modelId, imagePath) {
 const projectId = 'trashsort-388213';
 const location = 'asia-southeast2';
 const modelId = '7147810742962487296';
-const imagePath = '';
+const imagePath = bucket.file;
 
 // Call the classification function
 classifyImage(projectId, location, modelId, imagePath)

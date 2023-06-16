@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const multer = require('multer')
-const { classifyImage } = require('./modules/VertexAI')
+const { classifyImage } = require('./modules/vertexai')
 
 const uploadImage = require('./helpers/helpers')
 
@@ -44,35 +44,21 @@ app.use((err, req, res, next) => {
   next()
 })
 
-//to get the image url and send to vertex ai
-app.get('/classify', async (req, res, next) => {
-    try {
-        const imageUrl = req.query.imageUrl
-        const classificationResult = await classifyImage(imageUrl)
-        res
-            .status(200)
-            .json({
-                message: "Classification was successful",
-                data: classificationResult
-            })
-    } catch (error) {
-        next(error)
-    }
-})
-
-//to get the classification result from vertex ai and send to user
-app.get('/result', async (req, res, next) => {
-    try {
-        const classificationResult = req.query.classificationResult
-        res
-            .status(200)
-            .json({
-                message: "Classification was successful",
-                data: classificationResult
-            })
-    } catch (error) {
-        next(error)
-    }
+//to get the image url and send to vertex ai and send back the result to user
+app.post('/classify', async (req, res, next) => {
+  try {
+    const myFile = req.file
+    const imageUrl = await uploadImage(myFile)
+    const result = await classifyImage('trashsort-388213', 'asia-southeast2', '7147810742962487296', imageUrl)
+    res
+      .status(200)
+      .json({
+        message: "Upload was successful",
+        data: result
+      })
+  } catch (error) {
+    next(error)
+  }
 })
 
 app.listen(9001, () => {
